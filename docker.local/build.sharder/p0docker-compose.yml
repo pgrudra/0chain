@@ -2,20 +2,13 @@ version: '3'
 services:
   cassandra:
     image: cassandra:3.11.4
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '0.5'
-    #       memory: 1500M
-    #     reservations:
-    #       cpus: '0.25'
-    #       memory: 100M
     networks:
       default:
     #ports:
     #- "9042:9042"
     volumes:
     - ../sharder${SHARDER}/data/cassandra:/var/lib/cassandra/data
+    restart: "always"
 
   cassandra-init:
     image: cassandra:latest
@@ -27,17 +20,26 @@ services:
       - cassandra:cassandra
     restart: on-failure
 
-  sharder:
-    image: 0chaindev/sharder:latest
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '0.5'
-    #       memory: 500M
-    #     reservations:
-    #       cpus: '0.1'
-    #       memory: 100M
+  postgres:
+    image: postgres:14
     environment:
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ../config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ../sharder${SHARDER}/data/postgresql:/var/lib/postgresql/data
+      - ../sql_script/:/docker-entrypoint-initdb.d/
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    networks:
+      default:
+    restart: "always"
+
+  sharder:
+    image: 0chaindev/sharder:staging
+    environment:
+      - POSTGRES_HOST=postgres
       - DOCKER=true
       - CASSANDRA_CLUSTER=cassandra
     depends_on:
@@ -54,7 +56,11 @@ services:
       default:
       testnet0:
         ipv4_address: 198.18.0.8${SHARDER}
-    command: ./bin/sharder --deployment_mode 0 --keys_file config/b0snode${SHARDER}_keys.txt --minio_file config/minio_config.txt
+    command:
+      - /bin/sh
+      - -c
+      - mkdir -p /0chain/data/blocks && mkdir -p /0chain/data/rocksdb && ./bin/sharder --deployment_mode 0 --keys_file config/b0snode${SHARDER}_keys.txt --minio_file config/minio_config.txt
+    restart: "always"
 
 networks:
   default:
