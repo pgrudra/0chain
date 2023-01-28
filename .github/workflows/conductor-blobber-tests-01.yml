@@ -46,6 +46,7 @@ jobs:
       run: |
         sudo apt update -y
         sudo apt -y install build-essential nghttp2 libnghttp2-dev libssl-dev wget
+        sudo apt install zip -y
         cd 0chain
         make install-mockery
         make build-mocks
@@ -165,13 +166,15 @@ jobs:
 
     - name: Creating Artifact con-tests-logs.tar.gz file.
       run: |
+        cd 0chain
+        zip -r conductor-blobber-1.zip conductor
         find . -regex '.*/log/[^/]*.log' -print0 | tar -czvf con-tests-logs.tar.gz --null --files-from -
 
     - name: Uploading artifact con-tests-logs.tar.gz file.
       uses: actions/upload-artifact@v2
       with:
         name: Conductor-test-logs
-        path: ./con-tests-logs.tar.gz
+        path: ./0chain/conductor-blobber-1.zip
 
     # - name: Creating Artifact con-tests-backup-logs.tar.gz file.
     #   run: |
