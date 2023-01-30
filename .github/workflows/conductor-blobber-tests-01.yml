@@ -55,7 +55,7 @@ jobs:
         wget https://github.com/docker/docker-credential-helpers/releases/download/v0.6.3/docker-credential-secretservice-v0.6.3-amd64.tar.gz
         tar -xf docker-credential-secretservice-v0.6.3-amd64.tar.gz
         chmod +x docker-credential-secretservice
-        mv /usr/bin/docker-credential-secretservice /usr/bin/docker-credential-secretservice.bkp
+        # mv /usr/bin/docker-credential-secretservice /usr/bin/docker-credential-secretservice.bkp
         mv docker-credential-secretservice /usr/bin/
 
     - name: Docker Network Setup.
