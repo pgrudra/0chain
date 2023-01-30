@@ -957,7 +957,7 @@ func (r *Runner) Run() (err error, success bool) {
 
 			}
 
-			time.Sleep(time.Duration(1<<63 - 1))
+			// time.Sleep(time.Duration(1<<63 - 1))
 			report.e = time.Now()
 			r.report = append(r.report, report)
 			log.Printf("end of %d %s test case", i, testCase.Name)
