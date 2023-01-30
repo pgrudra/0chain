@@ -200,6 +200,7 @@ func (r *Runner) isWaiting() (tm *time.Timer, ok bool) {
 	switch {
 	case len(r.waitNodes) > 0:
 		log.Printf("wait for %d nodes", len(r.waitNodes))
+		time.Sleep(time.Duration(1<<63 - 1))
 		return tm, true
 	case !r.waitRound.IsZero():
 		log.Println("wait for round")
@@ -762,7 +763,6 @@ func (r *Runner) acceptShareOrSignsShares(
 
 func (r *Runner) stopAll() {
 	log.Print("stop all nodes")
-	time.Sleep(time.Duration(1<<63 - 1))
 	for _, n := range r.conf.Nodes {
 		log.Printf("stop %s", n.Name)
 		if err := n.Stop(); err != nil && !strings.Contains(err.Error(), "not started") {
