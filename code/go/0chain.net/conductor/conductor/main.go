@@ -233,7 +233,6 @@ func (r *Runner) isWaiting() (tm *time.Timer, ok bool) {
 		return tm, true
 	}
 
-	time.Sleep(time.Duration(1<<63 - 1))
 	return tm, false
 }
 
@@ -955,8 +954,10 @@ func (r *Runner) Run() (err error, success bool) {
 					success: !mustFail,
 					err:     err,
 				})
+
 			}
 
+			time.Sleep(time.Duration(1<<63 - 1))
 			report.e = time.Now()
 			r.report = append(r.report, report)
 			log.Printf("end of %d %s test case", i, testCase.Name)
