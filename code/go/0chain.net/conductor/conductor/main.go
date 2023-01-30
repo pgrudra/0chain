@@ -200,7 +200,6 @@ func (r *Runner) isWaiting() (tm *time.Timer, ok bool) {
 	switch {
 	case len(r.waitNodes) > 0:
 		log.Printf("wait for %d nodes", len(r.waitNodes))
-		time.Sleep(time.Duration(1<<63 - 1))
 		return tm, true
 	case !r.waitRound.IsZero():
 		log.Println("wait for round")
@@ -234,6 +233,7 @@ func (r *Runner) isWaiting() (tm *time.Timer, ok bool) {
 		return tm, true
 	}
 
+	time.Sleep(time.Duration(1<<63 - 1))
 	return tm, false
 }
 
