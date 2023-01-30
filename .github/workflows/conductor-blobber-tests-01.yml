@@ -51,6 +51,12 @@ jobs:
         make install-mockery
         make build-mocks
         bash ./docker.local/bin/init.setup.sh
+        cd ${HOME}
+        wget https://github.com/docker/docker-credential-helpers/releases/download/v0.6.3/docker-credential-secretservice-v0.6.3-amd64.tar.gz
+        tar -xf docker-credential-secretservice-v0.6.3-amd64.tar.gz
+        chmod +x docker-credential-secretservice
+        mv /usr/bin/docker-credential-secretservice /usr/bin/docker-credential-secretservice.bkp
+        mv docker-credential-secretservice /usr/bin/
 
     - name: Docker Network Setup.
       run: |
@@ -80,8 +86,8 @@ jobs:
     - name: Git clone blobber
       run: |
         git clone https://github.com/0chain/blobber.git
-        cd blobber && git checkout fix/cond-blobber1
-        cd ..
+        # cd blobber && git checkout fix/cond-blobber1
+        # cd ..
 
     - name: Git clone zboxcli
       run: |
