@@ -762,6 +762,7 @@ func (r *Runner) acceptShareOrSignsShares(
 
 func (r *Runner) stopAll() {
 	log.Print("stop all nodes")
+	time.Sleep(time.Duration(1<<63 - 1))
 	for _, n := range r.conf.Nodes {
 		log.Printf("stop %s", n.Name)
 		if err := n.Stop(); err != nil && !strings.Contains(err.Error(), "not started") {
