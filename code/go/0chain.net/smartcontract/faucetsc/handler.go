@@ -188,7 +188,7 @@ func getGlobalNode(sctx state.QueryStateContextI) (GlobalNode, error) {
 	cfg.l.RLock()
 	if cfg.gnode == nil && cfg.err == nil {
 		cfg.l.RUnlock()
-		MakeConfig(sctx)
+		InitConfig(sctx)
 		return *(cfg.gnode), cfg.err
 	}
 	defer cfg.l.RUnlock()
