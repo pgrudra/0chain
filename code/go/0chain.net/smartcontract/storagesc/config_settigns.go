@@ -847,10 +847,10 @@ func (ssc *StorageSmartContract) commitSettingChanges(
 		return "", common.NewError("update_settings_insert", err.Error())
 	}
 
-	cfg.l.Lock()
-	cfg.config = conf
-	cfg.err = err
-	cfg.l.Unlock()
+	cfgwtf.l.Lock()
+	cfgwtf.config = conf
+	cfgwtf.err = err
+	cfgwtf.l.Unlock()
 
 	return "", nil
 }

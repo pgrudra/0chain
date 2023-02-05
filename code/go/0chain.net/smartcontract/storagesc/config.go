@@ -203,7 +203,7 @@ type cache struct {
 	err    error
 }
 
-var cfg = &cache{
+var cfgwtf = &cache{
 	l: sync.RWMutex{},
 }
 
@@ -405,10 +405,10 @@ func (conf *Config) saveMints(toMint currency.Coin, balances chainState.StateCon
 	}
 	conf.Minted = minted
 	// TODO: change oop
-	cfg.l.Lock()
-	_, cfg.err = balances.InsertTrieNode(scConfigKey(ADDRESS), conf)
-	cfg.config = conf
-	cfg.l.Unlock()
+	cfgwtf.l.Lock()
+	_, cfgwtf.err = balances.InsertTrieNode(scConfigKey(ADDRESS), conf)
+	cfgwtf.config = conf
+	cfgwtf.l.Unlock()
 	return err
 }
 
@@ -573,18 +573,18 @@ func getConfiguredConfig() (conf *Config, err error) {
 }
 
 func InitConfig(balances chainState.CommonStateContextI) error {
-	cfg.l.Lock()
-	defer cfg.l.Unlock()
-	cfg.config = &Config{}
-	cfg.err = balances.GetTrieNode(scConfigKey(ADDRESS), cfg.config)
-	if cfg.err == util.ErrValueNotPresent {
-		cfg.config, cfg.err = getConfiguredConfig()
-		if cfg.err != nil {
-			return cfg.err
+	cfgwtf.l.Lock()
+	defer cfgwtf.l.Unlock()
+	cfgwtf.config = &Config{}
+	cfgwtf.err = balances.GetTrieNode(scConfigKey(ADDRESS), cfgwtf.config)
+	if cfgwtf.err == util.ErrValueNotPresent {
+		cfgwtf.config, cfgwtf.err = getConfiguredConfig()
+		if cfgwtf.err != nil {
+			return cfgwtf.err
 		}
-		_, cfg.err = balances.InsertTrieNode(scConfigKey(ADDRESS), cfg.config)
+		_, cfgwtf.err = balances.InsertTrieNode(scConfigKey(ADDRESS), cfgwtf.config)
 	}
-	return cfg.err
+	return cfgwtf.err
 }
 
 // getConfig

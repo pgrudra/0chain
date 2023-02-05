@@ -885,9 +885,9 @@ func SetMockConfig(
 	if err != nil {
 		panic(err)
 	}
-	cfg.l.Lock()
-	cfg.config = conf
-	cfg.l.Unlock()
+	cfgwtf.l.Lock()
+	cfgwtf.config = conf
+	cfgwtf.l.Unlock()
 	var mockCost = 100
 	conf.Cost = map[string]int{
 		"cost.update_settings":             mockCost,

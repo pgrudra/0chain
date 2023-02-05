@@ -551,7 +551,7 @@ func setupMocksFinishAllocation(
 
 	_, err = ctx.InsertTrieNode(scConfigKey(ADDRESS), &scYaml)
 	require.NoError(t, err)
-	cfg.config = &scYaml
+	cfgwtf.config = &scYaml
 
 	var request = lockRequest{
 		AllocationID: sAllocation.ID,
