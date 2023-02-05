@@ -3,6 +3,7 @@ package zcnsc
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"0chain.net/chaincore/chain/state"
 	"github.com/0chain/common/core/currency"
@@ -42,16 +43,34 @@ var CostFunctions = []string{
 	AddAuthorizerFunc,
 }
 
-// InitConfig initializes global node config to MPT
-func InitConfig(ctx state.StateContextI) error {
-	node := &GlobalNode{ID: ADDRESS}
-	err := ctx.GetTrieNode(node.GetKey(), node)
-	if err == util.ErrValueNotPresent {
-		node.ZCNSConfig = getConfig()
-		_, err := ctx.InsertTrieNode(node.GetKey(), node)
-		return err
+type cache struct {
+	gnode *GlobalNode
+	l     sync.RWMutex
+	err   error
+}
+
+var gnc = &cache{
+	l: sync.RWMutex{},
+}
+
+// InitConfig initializes or updates global node config to MPT
+func InitConfig(ctx state.CommonStateContextI) error {
+	gnc.l.Lock()
+	defer gnc.l.Unlock()
+	gnc.gnode = &GlobalNode{ID: ADDRESS}
+	gnc.err = ctx.GetTrieNode(gnc.gnode.GetKey(), gnc.gnode)
+	switch gnc.err {
+	case nil, util.ErrValueNotPresent:
+		if gnc.gnode.ZCNSConfig == nil {
+			gnc.gnode.ZCNSConfig = getConfig()
+		}
+		if gnc.gnode.WZCNNonceMinted == nil {
+			gnc.gnode.WZCNNonceMinted = make(map[int64]bool)
+		}
+		_, gnc.err = ctx.InsertTrieNode(gnc.gnode.GetKey(), gnc.gnode)
+		return gnc.err
 	}
-	return err
+	return gnc.err
 }
 
 func GetGlobalNode(ctx state.CommonStateContextI) (*GlobalNode, error) {
@@ -93,6 +112,7 @@ func (zcn *ZCNSmartContract) UpdateGlobalConfig(t *transaction.Transaction, inpu
 	if err != nil {
 		return "", common.NewError(Code, "saving global node: "+err.Error())
 	}
+	InitConfig(ctx)
 
 	return string(gn.Encode()), nil
 }
