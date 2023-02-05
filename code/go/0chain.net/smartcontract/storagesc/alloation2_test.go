@@ -551,7 +551,9 @@ func setupMocksFinishAllocation(
 
 	_, err = ctx.InsertTrieNode(scConfigKey(ADDRESS), &scYaml)
 	require.NoError(t, err)
+	cfgwtf.l.Lock()
 	cfgwtf.config = &scYaml
+	cfgwtf.l.Unlock()
 
 	var request = lockRequest{
 		AllocationID: sAllocation.ID,
@@ -774,6 +776,9 @@ func testNewAllocation(t *testing.T, request newAllocationRequest, blobbers Sort
 
 	_, err = ctx.InsertTrieNode(scConfigKey(ADDRESS), &scYaml)
 	require.NoError(t, err)
+	cfgwtf.l.Lock()
+	cfgwtf.config = &scYaml
+	cfgwtf.l.Unlock()
 
 	for _, blobber := range blobbers {
 		// Save the blobber
