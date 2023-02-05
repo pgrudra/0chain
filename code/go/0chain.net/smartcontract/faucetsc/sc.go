@@ -261,7 +261,7 @@ func (fc *FaucetSmartContract) getGlobalNode(balances c_state.StateContextI) (co
 	defer cfg.l.RUnlock()
 
 	if cfg.gnode != nil {
-		conf = cfg.node
+		conf = cfg.gnode
 		conf.ID = fc.ID
 	}
 	return conf, cfg.err
