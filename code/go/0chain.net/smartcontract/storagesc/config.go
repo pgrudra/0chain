@@ -199,8 +199,8 @@ type Config struct {
 
 type cache struct {
 	config *Config
-	l      sync.RWMutex
-	err    error
+	l      sync.RWMutex `msg:"-"`
+	err    error        `msg:"-"`
 }
 
 var cfgwtf = &cache{
