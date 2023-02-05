@@ -152,6 +152,7 @@ func (fc *FaucetSmartContract) updateSettings(
 	if err != nil {
 		return "", common.NewError("update_settings", "saving global node: "+err.Error())
 	}
+	cfg.gnode = gn
 	return string(gn.Encode()), nil
 }
 
