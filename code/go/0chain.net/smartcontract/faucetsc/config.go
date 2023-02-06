@@ -65,6 +65,13 @@ var cfg = &cache{
 	l: sync.RWMutex{},
 }
 
+func (*cache) update(gn *GlobalNode, err error) {
+	cfg.l.Lock()
+	cfg.gnode = gn
+	cfg.err = err
+	cfg.l.Unlock()
+}
+
 // configurations from sc.yaml
 func getFaucetConfig() (conf *FaucetConfig, err error) {
 

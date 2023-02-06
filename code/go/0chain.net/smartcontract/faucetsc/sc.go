@@ -152,7 +152,7 @@ func (fc *FaucetSmartContract) updateSettings(
 	if err != nil {
 		return "", common.NewError("update_settings", "saving global node: "+err.Error())
 	}
-	cfg.gnode = gn
+	cfg.update(gn, err)
 	return string(gn.Encode()), nil
 }
 
@@ -203,7 +203,7 @@ func (fc *FaucetSmartContract) pour(t *transaction.Transaction, _ []byte, balanc
 			return "", common.NewErrorf("pour", "error inserting global node: %v", err)
 		}
 		tokensPoured.Update(int64(transfer.Amount))
-		cfg.gnode = gn
+		cfg.update(gn, err)
 		return string(transfer.Encode()), nil
 	}
 	return "", err
@@ -225,7 +225,7 @@ func (fc *FaucetSmartContract) refill(t *transaction.Transaction, balances c_sta
 			return "", err
 		}
 		tokenRefills.Update(int64(transfer.Amount))
-		cfg.gnode = gn
+		cfg.update(gn, err)
 		return string(transfer.Encode()), nil
 	}
 	return "", common.NewError("broke", "it seems you're broke and can't transfer money")
