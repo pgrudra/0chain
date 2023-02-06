@@ -1092,9 +1092,7 @@ func TestStorageSmartContract_newAllocationRequest(t *testing.T) {
 
 	_, err = balances.InsertTrieNode(scConfigKey(ADDRESS), conf)
 	require.NoError(t, err)
-	cfgwtf.l.Lock()
-	cfgwtf.config = conf
-	cfgwtf.l.Unlock()
+	cfg.update(conf, err)
 
 	// 1.
 	t.Run("unexpected end of JSON input", func(t *testing.T) {
@@ -1525,9 +1523,7 @@ func createNewTestAllocation(t *testing.T, ssc *StorageSmartContract,
 
 	_, err = balances.InsertTrieNode(scConfigKey(ADDRESS), &conf)
 	require.NoError(t, err)
-	cfgwtf.l.Lock()
-	cfgwtf.config = &conf
-	cfgwtf.l.Unlock()
+	cfg.update(&conf, err)
 
 	allBlobbers = newTestAllBlobbers()
 	// make the blobbers health

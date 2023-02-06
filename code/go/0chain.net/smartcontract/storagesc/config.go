@@ -393,11 +393,8 @@ func (conf *Config) saveMints(toMint currency.Coin, balances chainState.StateCon
 		return fmt.Errorf("max min %v exceeded by: %v", conf.MaxMint, minted)
 	}
 	conf.Minted = minted
-	// TODO: change oop
-	cfgwtf.l.Lock()
-	_, cfgwtf.err = balances.InsertTrieNode(scConfigKey(ADDRESS), conf)
-	cfgwtf.config = conf
-	cfgwtf.l.Unlock()
+	_, err = balances.InsertTrieNode(scConfigKey(ADDRESS), conf)
+	cfg.update(conf, err)
 	return err
 }
 
@@ -562,18 +559,18 @@ func getConfiguredConfig() (conf *Config, err error) {
 }
 
 func InitConfig(balances chainState.CommonStateContextI) error {
-	cfgwtf.l.Lock()
-	defer cfgwtf.l.Unlock()
-	cfgwtf.config = &Config{}
-	cfgwtf.err = balances.GetTrieNode(scConfigKey(ADDRESS), cfgwtf.config)
-	if cfgwtf.err == util.ErrValueNotPresent {
-		cfgwtf.config, cfgwtf.err = getConfiguredConfig()
-		if cfgwtf.err != nil {
-			return cfgwtf.err
+	cfg.l.Lock()
+	defer cfg.l.Unlock()
+	cfg.config = &Config{}
+	cfg.err = balances.GetTrieNode(scConfigKey(ADDRESS), cfg.config)
+	if cfg.err == util.ErrValueNotPresent {
+		cfg.config, cfg.err = getConfiguredConfig()
+		if cfg.err != nil {
+			return cfg.err
 		}
-		_, cfgwtf.err = balances.InsertTrieNode(scConfigKey(ADDRESS), cfgwtf.config)
+		_, cfg.err = balances.InsertTrieNode(scConfigKey(ADDRESS), cfg.config)
 	}
-	return cfgwtf.err
+	return cfg.err
 }
 
 // getConfig
