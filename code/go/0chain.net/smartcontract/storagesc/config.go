@@ -3,7 +3,6 @@ package storagesc
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/0chain/common/core/currency"
@@ -195,16 +194,6 @@ type Config struct {
 
 	OwnerId string         `json:"owner_id"`
 	Cost    map[string]int `json:"cost"`
-}
-
-type cache struct {
-	config *Config
-	l      sync.RWMutex `msg:"-"`
-	err    error        `msg:"-"`
-}
-
-var cfgwtf = &cache{
-	l: sync.RWMutex{},
 }
 
 func (conf *Config) validate() (err error) {
