@@ -1,6 +1,7 @@
 package zcnsc_test
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -53,8 +54,11 @@ func Test_DifferentSenderAndReceiverMustFail(t *testing.T) {
 
 func Test_FuzzyMintTest(t *testing.T) {
 	ctx := MakeMockStateContext()
+	fmt.Printf("NonceMinted after init: %v\n", ctx.globalNode.WZCNNonceMinted)
 	contract := CreateZCNSmartContract()
 	payload, err := CreateMintPayload(ctx, defaultClient)
+	payload.Nonce = 10050032
+
 	require.NoError(t, err)
 
 	for _, client := range clients {
@@ -62,7 +66,7 @@ func Test_FuzzyMintTest(t *testing.T) {
 		require.NoError(t, err)
 
 		response, err := contract.Mint(transaction, payload.Encode(), ctx)
-
+		fmt.Printf("NonceMinted after Mint for client %v: %v\n", client, ctx.globalNode.WZCNNonceMinted)
 		require.NoError(t, err, "Testing authorizer: '%s'", client)
 		require.NotNil(t, response)
 		require.NotEmpty(t, response)

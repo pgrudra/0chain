@@ -71,6 +71,7 @@ func InitConfig(ctx state.CommonStateContextI) error {
 		if gnc.gnode.ZCNSConfig == nil {
 			gnc.gnode.ZCNSConfig = getConfig()
 		}
+
 		if gnc.gnode.WZCNNonceMinted == nil {
 			gnc.gnode.WZCNNonceMinted = make(map[int64]bool)
 		}

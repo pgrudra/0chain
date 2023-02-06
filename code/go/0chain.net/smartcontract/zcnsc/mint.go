@@ -175,8 +175,6 @@ func (zcn *ZCNSmartContract) Mint(trans *transaction.Transaction, inputData []by
 		return
 	}
 
-	gnc.update(gn, err)
-
 	resp = string(payload.Encode())
 	return
 }
