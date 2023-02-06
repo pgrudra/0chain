@@ -53,6 +53,13 @@ var gnc = &cache{
 	l: sync.RWMutex{},
 }
 
+func (*cache) update(gn *GlobalNode, err error) {
+	gnc.l.Lock()
+	gnc.gnode = gn
+	gnc.err = err
+	gnc.l.Unlock()
+}
+
 // InitConfig initializes or updates global node config to MPT
 func InitConfig(ctx state.CommonStateContextI) error {
 	gnc.l.Lock()
@@ -112,7 +119,7 @@ func (zcn *ZCNSmartContract) UpdateGlobalConfig(t *transaction.Transaction, inpu
 	if err != nil {
 		return "", common.NewError(Code, "saving global node: "+err.Error())
 	}
-	InitConfig(ctx)
+	gnc.update(gn, err)
 
 	return string(gn.Encode()), nil
 }
