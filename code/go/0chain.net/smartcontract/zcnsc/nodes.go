@@ -203,7 +203,6 @@ func (gn *GlobalNode) Decode(input []byte) error {
 
 func (gn *GlobalNode) Save(balances cstate.StateContextI) (err error) {
 	_, err = balances.InsertTrieNode(gn.GetKey(), gn)
-	gnc.update(gn, err)
 	return
 }
 
