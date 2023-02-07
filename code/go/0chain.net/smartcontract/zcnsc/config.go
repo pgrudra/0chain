@@ -46,38 +46,35 @@ var CostFunctions = []string{
 type cache struct {
 	config *ZCNSConfig
 	l      sync.RWMutex
-	err    error
 }
 
-var zcnscfg = &cache{
+var c = &cache{
 	l: sync.RWMutex{},
 }
 
-func (*cache) update(gn *GlobalNode, err error) {
-	zcnscfg.l.Lock()
-	zcnscfg.config = gn.ZCNSConfig
-	zcnscfg.err = err
-	zcnscfg.l.Unlock()
+func (*cache) update(conf *ZCNSConfig) {
+	c.l.Lock()
+	c.config = conf
+	c.l.Unlock()
 }
 
-func UpdateCache(gn *GlobalNode, err error) {
-	zcnscfg.update(gn, err)
+func UpdateConfigCache(gn *GlobalNode) {
+	c.update(gn.ZCNSConfig)
 }
 
 // InitConfig initializes global node config to MPT and caches ZCNSConfig
 func InitConfig(ctx state.CommonStateContextI) error {
-	zcnscfg.l.Lock()
-	defer zcnscfg.l.Unlock()
+	c.l.Lock()
+	defer c.l.Unlock()
+
 	node := &GlobalNode{ID: ADDRESS}
-	zcnscfg.err = ctx.GetTrieNode(node.GetKey(), node)
-	if zcnscfg.err == util.ErrValueNotPresent {
+	err := ctx.GetTrieNode(node.GetKey(), node)
+	if err == util.ErrValueNotPresent {
 		node.ZCNSConfig = getConfig()
-		_, zcnscfg.err = ctx.InsertTrieNode(node.GetKey(), node)
-		zcnscfg.config = node.ZCNSConfig
-		return zcnscfg.err
+		_, err = ctx.InsertTrieNode(node.GetKey(), node)
 	}
-	zcnscfg.config = node.ZCNSConfig
-	return zcnscfg.err
+	c.config = node.ZCNSConfig
+	return err
 }
 
 func GetGlobalNode(ctx state.CommonStateContextI) (*GlobalNode, error) {
@@ -119,7 +116,7 @@ func (zcn *ZCNSmartContract) UpdateGlobalConfig(t *transaction.Transaction, inpu
 	if err != nil {
 		return "", common.NewError(Code, "saving global node: "+err.Error())
 	}
-	zcnscfg.update(gn, err)
+	c.update(gn.ZCNSConfig)
 
 	return string(gn.Encode()), nil
 }

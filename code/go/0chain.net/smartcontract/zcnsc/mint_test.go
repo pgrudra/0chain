@@ -101,7 +101,7 @@ func Test_MaxFeeMint(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := MakeMockStateContext()
 			ctx.globalNode.ZCNSConfig.MaxFee = tc.maxFee
-			UpdateCache(ctx.globalNode, nil)
+			UpdateConfigCache(ctx.globalNode)
 			contract := CreateZCNSmartContract()
 			payload, err := CreateMintPayload(ctx, defaultClient)
 			require.NoError(t, err)
