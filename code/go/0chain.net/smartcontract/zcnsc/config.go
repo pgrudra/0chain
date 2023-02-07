@@ -3,6 +3,7 @@ package zcnsc
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"0chain.net/chaincore/chain/state"
 	"github.com/0chain/common/core/currency"
@@ -42,53 +43,41 @@ var CostFunctions = []string{
 	AddAuthorizerFunc,
 }
 
-// Din
-// type cache struct {
-// 	gnode *GlobalNode
-// 	l     sync.RWMutex
-// 	err   error
-// }
+type cache struct {
+	config *ZCNSConfig
+	l      sync.RWMutex
+	err    error
+}
 
-// var gnc = &cache{
-// 	l: sync.RWMutex{},
-// }
+var zcnscfg = &cache{
+	l: sync.RWMutex{},
+}
 
-// func (*cache) update(gn *GlobalNode, err error) {
-// 	gnc.l.Lock()
-// 	gnc.gnode = gn
-// 	gnc.err = err
-// 	gnc.l.Unlock()
-// }
+func (*cache) update(gn *GlobalNode, err error) {
+	zcnscfg.l.Lock()
+	zcnscfg.config = gn.ZCNSConfig
+	zcnscfg.err = err
+	zcnscfg.l.Unlock()
+}
 
-// InitConfig initializes or updates global node config to MPT
+func UpdateCache(gn *GlobalNode, err error) {
+	zcnscfg.update(gn, err)
+}
+
+// InitConfig initializes global node config to MPT and caches ZCNSConfig
 func InitConfig(ctx state.CommonStateContextI) error {
+	zcnscfg.l.Lock()
+	defer zcnscfg.l.Unlock()
 	node := &GlobalNode{ID: ADDRESS}
-	err := ctx.GetTrieNode(node.GetKey(), node)
-	if err == util.ErrValueNotPresent {
+	zcnscfg.err = ctx.GetTrieNode(node.GetKey(), node)
+	if zcnscfg.err == util.ErrValueNotPresent {
 		node.ZCNSConfig = getConfig()
-		_, err := ctx.InsertTrieNode(node.GetKey(), node)
-		return err
+		_, zcnscfg.err = ctx.InsertTrieNode(node.GetKey(), node)
+		zcnscfg.config = node.ZCNSConfig
+		return zcnscfg.err
 	}
-	return err
-
-	// Din
-	// gnc.l.Lock()
-	// defer gnc.l.Unlock()
-	// gnc.gnode = &GlobalNode{ID: ADDRESS}
-	// gnc.err = ctx.GetTrieNode(gnc.gnode.GetKey(), gnc.gnode)
-	// switch gnc.err {
-	// case util.ErrValueNotPresent:
-	// 	if gnc.gnode.ZCNSConfig == nil {
-	// 		gnc.gnode.ZCNSConfig = getConfig()
-	// 	}
-
-	// 	if gnc.gnode.WZCNNonceMinted == nil {
-	// 		gnc.gnode.WZCNNonceMinted = make(map[int64]bool)
-	// 	}
-	// 	_, gnc.err = ctx.InsertTrieNode(gnc.gnode.GetKey(), gnc.gnode)
-	// 	return gnc.err
-	// }
-	// return gnc.err
+	zcnscfg.config = node.ZCNSConfig
+	return zcnscfg.err
 }
 
 func GetGlobalNode(ctx state.CommonStateContextI) (*GlobalNode, error) {
@@ -130,8 +119,7 @@ func (zcn *ZCNSmartContract) UpdateGlobalConfig(t *transaction.Transaction, inpu
 	if err != nil {
 		return "", common.NewError(Code, "saving global node: "+err.Error())
 	}
-	// Din
-	// gnc.update(gn, err)
+	zcnscfg.update(gn, err)
 
 	return string(gn.Encode()), nil
 }

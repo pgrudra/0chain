@@ -54,8 +54,7 @@ func MakeMockStateContext() *mockStateContext {
 		createTestAuthorizer(ctx, id)
 		createTestStakingPools(ctx, id)
 	}
-	// Din
-	// InitConfig(ctx)
+	InitConfig(ctx)
 	return ctx
 }
 
