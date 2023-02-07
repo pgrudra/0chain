@@ -202,8 +202,11 @@ func (gn *GlobalNode) Decode(input []byte) error {
 }
 
 func (gn *GlobalNode) Save(balances cstate.StateContextI) (err error) {
+	fmt.Printf("===>   Inside gn.Save, before InsertTrieNode, \ngn.GetKey(): %s, \ngn: %+v\n", gn.GetKey(), gn)
 	_, err = balances.InsertTrieNode(gn.GetKey(), gn)
-	gnc.update(gn, err)
+	fmt.Printf("===>   Inside gn.Save, after InsertTrieNode, \ngn.GetKey(): %s, \ngn: %+v\n", gn.GetKey(), gn)
+	// Din
+	// gnc.update(gn, err)
 	return
 }
 

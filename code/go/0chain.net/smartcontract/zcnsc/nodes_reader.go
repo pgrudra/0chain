@@ -1,6 +1,8 @@
 package zcnsc
 
 import (
+	"fmt"
+
 	"0chain.net/chaincore/config"
 	"github.com/0chain/common/core/util"
 
@@ -35,12 +37,31 @@ func GetUserNode(id string, ctx state.StateContextI) (*UserNode, error) {
 }
 
 func GetGlobalSavedNode(ctx state.CommonStateContextI) (*GlobalNode, error) {
-	gnc.l.RLock()
-	if gnc.gnode == nil && gnc.err == nil {
-		gnc.l.RUnlock()
-		InitConfig(ctx)
-		return gnc.gnode, gnc.err
+	node := &GlobalNode{ID: ADDRESS}
+	err := ctx.GetTrieNode(node.GetKey(), node)
+	fmt.Printf("===>    Inside GetGlobalSavedNode, after GetTrieNode\nnode.GetKey(): %s,\ngn: %+v\n", node.GetKey(), node)
+	switch err {
+	case nil, util.ErrValueNotPresent:
+		if node.ZCNSConfig == nil {
+			fmt.Printf("=>    Inside GetGlobalSavedNode, node.ZCNSConfig = nil\n")
+			node.ZCNSConfig = getConfig()
+		}
+		if node.WZCNNonceMinted == nil {
+			fmt.Printf("=>    Inside GetGlobalSavedNode, WZCNNonceMinted = nil\n")
+			node.WZCNNonceMinted = make(map[int64]bool)
+		}
+		return node, nil
+	default:
+		return nil, err
 	}
-	defer gnc.l.RUnlock()
-	return gnc.gnode, gnc.err
+
+	// Din
+	// gnc.l.RLock()
+	// if gnc.gnode == nil && gnc.err == nil {
+	// 	gnc.l.RUnlock()
+	// 	InitConfig(ctx)
+	// 	return gnc.gnode, gnc.err
+	// }
+	// defer gnc.l.RUnlock()
+	// return gnc.gnode, gnc.err
 }

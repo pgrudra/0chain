@@ -92,7 +92,8 @@ func (zcn *ZCNSmartContract) Mint(trans *transaction.Transaction, inputData []by
 		err = common.NewError(code, msg)
 		return
 	}
-
+	fmt.Printf(">>      Inside Mint gn.WZCNNonceMinted: %v\n", gn.WZCNNonceMinted)
+	fmt.Printf(">>      Inside Mint payload.Nonce: %v\n", payload.Nonce)
 	_, exists := gn.WZCNNonceMinted[payload.Nonce]
 	if exists { // global nonce from ETH SC has already been minted
 		err = common.NewError(
@@ -168,6 +169,7 @@ func (zcn *ZCNSmartContract) Mint(trans *transaction.Transaction, inputData []by
 		return
 	}
 
+	fmt.Printf(">>         Inside Mint, before gn.Save \ngn: %+v\n", gn)
 	// Save the user node
 	err = gn.Save(ctx)
 	if err != nil {
