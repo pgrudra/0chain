@@ -152,7 +152,7 @@ func (fc *FaucetSmartContract) updateSettings(
 	if err != nil {
 		return "", common.NewError("update_settings", "saving global node: "+err.Error())
 	}
-	cfg.update(gn, err)
+	c.update(gn.FaucetConfig)
 	return string(gn.Encode()), nil
 }
 
@@ -203,7 +203,7 @@ func (fc *FaucetSmartContract) pour(t *transaction.Transaction, _ []byte, balanc
 			return "", common.NewErrorf("pour", "error inserting global node: %v", err)
 		}
 		tokensPoured.Update(int64(transfer.Amount))
-		cfg.update(gn, err)
+		c.update(gn.FaucetConfig)
 		return string(transfer.Encode()), nil
 	}
 	return "", err
@@ -225,7 +225,7 @@ func (fc *FaucetSmartContract) refill(t *transaction.Transaction, balances c_sta
 			return "", err
 		}
 		tokenRefills.Update(int64(transfer.Amount))
-		cfg.update(gn, err)
+		c.update(gn.FaucetConfig)
 		return string(transfer.Encode()), nil
 	}
 	return "", common.NewError("broke", "it seems you're broke and can't transfer money")
@@ -251,20 +251,19 @@ func (fc *FaucetSmartContract) getUserVariables(t *transaction.Transaction, gn *
 	return un
 }
 
-func (fc *FaucetSmartContract) getGlobalNode(balances c_state.StateContextI) (conf *GlobalNode, err error) {
-	cfg.l.RLock()
-	if cfg.gnode == nil && cfg.err == nil {
-		cfg.l.RUnlock()
-		InitConfig(balances)
-		cfg.l.RLock()
+func (fc *FaucetSmartContract) getGlobalNode(balances c_state.StateContextI) (node *GlobalNode, err error) {
+	c.l.RLock()
+	if c.config == nil {
+		c.l.RUnlock()
+		err := InitConfig(balances)
+		if err != nil {
+			return nil, err
+		}
+		c.l.RLock()
 	}
-	defer cfg.l.RUnlock()
-
-	if cfg.gnode != nil {
-		conf = cfg.gnode
-		conf.ID = fc.ID
-	}
-	return conf, cfg.err
+	node = &GlobalNode{ID: fc.ID, FaucetConfig: c.config}
+	defer c.l.RUnlock()
+	return node, err
 }
 
 func (fc *FaucetSmartContract) getGlobalVariables(t *transaction.Transaction, balances c_state.StateContextI) (*GlobalNode, error) {

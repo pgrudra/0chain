@@ -184,13 +184,17 @@ func (frh *FaucetscRestHandler) getPersonalPeriodicLimit(w http.ResponseWriter, 
 	common.Respond(w, r, resp, nil)
 }
 
-func getGlobalNode(sctx state.QueryStateContextI) (*GlobalNode, error) {
-	cfg.l.RLock()
-	if cfg.gnode == nil && cfg.err == nil {
-		cfg.l.RUnlock()
-		InitConfig(sctx)
-		return cfg.gnode, cfg.err
+func getGlobalNode(sctx state.QueryStateContextI) (node *GlobalNode, err error) {
+	c.l.RLock()
+	if c.config == nil {
+		c.l.RUnlock()
+		err := InitConfig(sctx)
+		if err != nil {
+			return nil, err
+		}
+		c.l.RLock()
 	}
-	defer cfg.l.RUnlock()
-	return cfg.gnode, cfg.err
+	node = &GlobalNode{ID: ADDRESS, FaucetConfig: c.config}
+	defer c.l.RUnlock()
+	return node, err
 }

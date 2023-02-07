@@ -56,20 +56,18 @@ type FaucetConfig struct {
 }
 
 type cache struct {
-	gnode *GlobalNode
-	l     sync.RWMutex
-	err   error
+	config *FaucetConfig
+	l      sync.RWMutex
 }
 
-var cfg = &cache{
+var c = &cache{
 	l: sync.RWMutex{},
 }
 
-func (*cache) update(gn *GlobalNode, err error) {
-	cfg.l.Lock()
-	cfg.gnode = gn
-	cfg.err = err
-	cfg.l.Unlock()
+func (*cache) update(conf *FaucetConfig) {
+	c.l.Lock()
+	c.config = conf
+	c.l.Unlock()
 }
 
 // configurations from sc.yaml
@@ -100,21 +98,21 @@ func getFaucetConfig() (conf *FaucetConfig, err error) {
 }
 
 func InitConfig(balances cstate.CommonStateContextI) error {
-	cfg.l.Lock()
-	defer cfg.l.Unlock()
-	var gn = new(GlobalNode)
-	cfg.err = balances.GetTrieNode(globalNodeKey, gn)
-	if cfg.err == util.ErrValueNotPresent {
-		gn.FaucetConfig, cfg.err = getFaucetConfig()
-		if cfg.err != nil {
-			return cfg.err
+	c.l.Lock()
+	defer c.l.Unlock()
+
+	var gn = &GlobalNode{ID: ADDRESS}
+	err := balances.GetTrieNode(globalNodeKey, gn)
+	if err == util.ErrValueNotPresent {
+		gn.FaucetConfig, err = getFaucetConfig()
+		if err != nil {
+			return err
 		}
-		gn.ID = ADDRESS
-		_, cfg.err = balances.InsertTrieNode(globalNodeKey, gn)
-		if cfg.err != nil {
-			return cfg.err
+		_, err = balances.InsertTrieNode(globalNodeKey, gn)
+		if err != nil {
+			return err
 		}
 	}
-	cfg.gnode = gn
-	return cfg.err
+	c.config = gn.FaucetConfig
+	return err
 }

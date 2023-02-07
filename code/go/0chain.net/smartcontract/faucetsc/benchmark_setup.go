@@ -24,7 +24,7 @@ func AddMockGlobalNode(balances cstate.StateContextI) {
 		ID: ADDRESS,
 	}
 	_, _ = balances.InsertTrieNode(gn.GetKey(), gn)
-	cfg.update(gn, nil)
+	c.update(gn.FaucetConfig)
 }
 
 func AddMockUserNodes(
